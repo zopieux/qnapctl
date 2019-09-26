@@ -8,19 +8,19 @@
 #include <QTimer>
 
 #include "LCD.h"
-#include "QNAPCtrl.h"
+#include "QNAPCtl.h"
 #include "SIOPoller.h"
 
-QNAPCtrl::QNAPCtrl(QObject *parent) : QObject(parent) {
+QNAPCtl::QNAPCtl(QObject *parent) : QObject(parent) {
   lcd_ = new LCD(this);
   if (!lcd_->open("/dev/ttyS1")) {
     qWarning() << "Failed to open LCD serial port";
   }
-  connect(lcd_, &LCD::buttonEvent, this, &QNAPCtrl::emitButtonEvent);
+  connect(lcd_, &LCD::buttonEvent, this, &QNAPCtl::emitButtonEvent);
 
   sio_helper_ = new SIOPoller(this);
   connect(sio_helper_, &SIOPoller::buttonEvent, this,
-          &QNAPCtrl::emitButtonEvent);
+          &QNAPCtl::emitButtonEvent);
 
   // Switch everything off at startup.
   auto &&meta = QMetaEnum::fromType<PanelLED>();
@@ -31,7 +31,7 @@ QNAPCtrl::QNAPCtrl(QObject *parent) : QObject(parent) {
   sio_helper_->start();
 }
 
-void QNAPCtrl::writeLCD(QString text) {
+void QNAPCtl::writeLCD(QString text) {
   const auto &lines = text.split("\n").mid(0, 2);
   int index = 0;
   for (const auto &line : lines) {
@@ -39,23 +39,23 @@ void QNAPCtrl::writeLCD(QString text) {
   }
 }
 
-void QNAPCtrl::writeLCD(int line, QString text) {
+void QNAPCtl::writeLCD(int line, QString text) {
   if (!lcd_->write(line, text.toLatin1())) {
     qWarning() << "Failed to write to LCD";
   }
 }
 
-void QNAPCtrl::setLCDBacklight(bool on) {
+void QNAPCtl::setLCDBacklight(bool on) {
   if (!lcd_->setBacklight(on)) {
     qWarning() << "Failed to switch LCD backlight";
   }
 }
 
-void QNAPCtrl::setLED(QNAPCtrl::PanelLED led, bool on) {
+void QNAPCtl::setLED(QNAPCtl::PanelLED led, bool on) {
   sio_helper_->setLed(led, on);
 }
 
-void QNAPCtrl::setLED(const QString &led_name, bool on) {
+void QNAPCtl::setLED(const QString &led_name, bool on) {
   auto &&meta = QMetaEnum::fromType<PanelLED>();
   bool ok;
   const PanelLED led =
@@ -65,6 +65,6 @@ void QNAPCtrl::setLED(const QString &led_name, bool on) {
   setLED(led, on);
 }
 
-void QNAPCtrl::emitButtonEvent(QNAPCtrl::PanelButton button, bool pressed) {
+void QNAPCtl::emitButtonEvent(QNAPCtl::PanelButton button, bool pressed) {
   emit buttonEvent(QVariant::fromValue(button).toString(), pressed);
 }

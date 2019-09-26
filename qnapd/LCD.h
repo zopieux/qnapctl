@@ -2,7 +2,7 @@
 
 #include <QtSerialPort>
 
-#include "QNAPCtrl.h"
+#include "QNAPCtl.h"
 
 class LCD : public QObject {
   Q_OBJECT
@@ -11,7 +11,7 @@ public:
   explicit LCD(QObject *parent = nullptr);
 
 signals:
-  void buttonEvent(QNAPCtrl::PanelButton button, bool pressed);
+  void buttonEvent(QNAPCtl::PanelButton button, bool pressed);
 
 public slots:
   bool open(const QString &portName);

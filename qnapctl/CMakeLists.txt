@@ -4,11 +4,12 @@ project(qnapctl)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5DBus REQUIRED)
 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Generate an adaptor C++ class from the XML service definition.
-set(interface_xml ${qnapd_SOURCE_DIR}/eu.zopi.qnapctrl.xml)
-set_source_files_properties(${interface_xml} PROPERTIES CLASSNAME QNAPCtrlInterface)
+set(interface_xml ${qnapd_SOURCE_DIR}/eu.zopi.qnapctl.xml)
+set_source_files_properties(${interface_xml} PROPERTIES CLASSNAME QNAPCtlInterface)
 set_source_files_properties(${interface_xml} PROPERTIES NO_NAMESPACE true)
 qt5_add_dbus_interface(
   qnapctl_interface_SRCS
@@ -16,7 +17,7 @@ qt5_add_dbus_interface(
   qnapctl_dbus
 )
 
-# QNAPCtrl daemon (qnapd)
+# QNAPCtl daemon (qnapd)
 set(
   qnapctl_SRCS
   ${qnapctl_interface_SRCS}

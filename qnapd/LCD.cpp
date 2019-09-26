@@ -1,5 +1,5 @@
 #include "LCD.h"
-#include "QNAPCtrl.h"
+#include "QNAPCtl.h"
 
 namespace {
 
@@ -83,11 +83,11 @@ void LCD::readyRead() {
   const bool btn_select_state = buf[3] & kButtonSelect;
 
   if (has_state_ && btn_enter_state != btn_enter_state_) {
-    emit buttonEvent(QNAPCtrl::PanelButton::ENTER, btn_enter_state);
+    emit buttonEvent(QNAPCtl::PanelButton::ENTER, btn_enter_state);
   }
 
   if (has_state_ && btn_select_state != btn_select_state_) {
-    emit buttonEvent(QNAPCtrl::PanelButton::SELECT, btn_select_state);
+    emit buttonEvent(QNAPCtl::PanelButton::SELECT, btn_select_state);
   }
 
   has_state_ = true;

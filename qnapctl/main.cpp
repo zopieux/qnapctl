@@ -5,10 +5,10 @@
 int main(int argc, char *argv[]) {
   QCoreApplication app(argc, argv);
 
-  QNAPCtrlInterface *ctrl = new QNAPCtrlInterface(
-      "eu.zopi.QNAPCtrl", "/eu/zopi/qnapctrl", QDBusConnection::systemBus());
+  QNAPCtlInterface *ctrl = new QNAPCtlInterface(
+      "eu.zopi.QNAPCtl", "/eu/zopi/qnapctrl", QDBusConnection::systemBus());
 
-  QCoreApplication::connect(ctrl, &QNAPCtrlInterface::buttonEvent,
+  QCoreApplication::connect(ctrl, &QNAPCtlInterface::buttonEvent,
                             [ctrl](const QString &button, bool pressed) {
                               if (button == "USB_COPY") {
                                 ctrl->setLED("USB", pressed);

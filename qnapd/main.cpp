@@ -7,10 +7,10 @@
 #include <QtCore>
 
 #include "LCD.h"
-#include "QNAPCtrl.h"
-#include "qnapctrladaptor.h"
+#include "QNAPCtl.h"
+#include "qnapctladaptor.h"
 
-constexpr char kServiceName[] = "eu.zopi.QNAPCtrl";
+constexpr char kServiceName[] = "eu.zopi.QNAPCtl";
 constexpr char kServicePath[] = "/eu/zopi/qnapctrl";
 
 int main(int argc, char *argv[]) {
@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
 
   auto systemBus = QDBusConnection::systemBus();
 
-  auto *ctrl = new QNAPCtrl;
-  new QNAPCtrlInterfaceAdaptor(ctrl);
+  auto *ctrl = new QNAPCtl;
+  new QNAPCtlInterfaceAdaptor(ctrl);
 
   if (!systemBus.registerObject(kServicePath, ctrl)) {
-    std::cerr << "Could not register QNAPCtrl object: "
+    std::cerr << "Could not register QNAPCtl object: "
               << qPrintable(systemBus.lastError().message()) << "\n";
     exit(1);
   }
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   }
 
   std::cerr << "Ready.\n"
-               "  Interface: eu.zopi.QNAPCtrlInterface\n    Service: "
+               "  Interface: eu.zopi.QNAPCtlInterface\n    Service: "
             << kServiceName << "\n       Path: " << kServicePath << "\n";
 
   return app.exec();
