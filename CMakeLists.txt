@@ -8,3 +8,4 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 add_subdirectory(qnapd)
+add_subdirectory(qnapctl)
