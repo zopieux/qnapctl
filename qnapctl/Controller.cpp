@@ -23,7 +23,7 @@ Controller::Controller(QObject* parent)
       services_running_(0),
       services_failed_(0) {
   sleep_timer_ = new QTimer(this);
-  sleep_timer_->setInterval(2 * 1000);
+  sleep_timer_->setInterval(4 * 1000);
   sleep_timer_->setSingleShot(true);
   connect(sleep_timer_, &QTimer::timeout, this, &Controller::goToSleep);
 
@@ -47,6 +47,7 @@ Controller::Controller(QObject* parent)
   connect(ctrl_, &QNAPCtlInterface::buttonEvent, this,
           &Controller::onButtonEvent);
 
+  goToSleep();
   poll_status_timer_->start();
 }
 
@@ -113,6 +114,8 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
     return;
   }
 
+  if (!pressed) return;
+
   const bool isSelect = button == "SELECT";
   const bool isEnter = button == "ENTER";
 
@@ -121,8 +124,8 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
     state_ = State::STATUS;
 
     const auto& hostname = QHostInfo::localHostName();
-    ctrl_->writeLCD(0, QString("Hostname: %1").arg(hostname));
-    ctrl_->writeLCD(1, QString("Load %1 Serv. %2")
+    ctrl_->writeLCD(0, QString("H: %1").arg(hostname));
+    ctrl_->writeLCD(1, QString("L: %1  S: %2")
                            .arg(load_average_, 0, 'f', 1)
                            .arg(services_running_, 2));
   };
@@ -135,8 +138,7 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
     for (const auto& addr : QNetworkInterface::allAddresses()) {
       addrs.append(addr.toString());
     }
-    if (addrs.size() >= 1)  // NOLINT(readability-container-size-empty)
-      ctrl_->writeLCD(0, "IP: " + addrs.at(0));
+    if (addrs.size() >= 1) ctrl_->writeLCD(0, "IP: " + addrs.at(0));
     if (addrs.size() >= 2) ctrl_->writeLCD(1, "IP: " + addrs.at(1));
   };
 
