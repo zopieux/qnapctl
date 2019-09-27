@@ -4,6 +4,7 @@
 
 #include <QBitArray>
 #include <QDebug>
+#include <QThread>
 #include <QTimer>
 
 namespace {
@@ -18,32 +19,32 @@ constexpr unsigned short kRegPort = 0xa05;
 constexpr unsigned short kValuePort = kRegPort + 1;
 constexpr int kPortCount = 2;
 
-constexpr Port<QNAPCtl::PanelLED, 2> portStatusLed = {
+constexpr Port<Daemon::PanelLED, 2> portStatusLed = {
     0x91,
     {{
-        {QNAPCtl::PanelLED::STATUS_GREEN, 2},
-        {QNAPCtl::PanelLED::STATUS_RED, 3},
+        {Daemon::PanelLED::STATUS_GREEN, 2},
+        {Daemon::PanelLED::STATUS_RED, 3},
     }}};
 
-constexpr Port<QNAPCtl::PanelLED, 4> portDiskLeds = {
+constexpr Port<Daemon::PanelLED, 4> portDiskLeds = {
     0x81,
     {{
-        {QNAPCtl::PanelLED::DISK_1, 0},
-        {QNAPCtl::PanelLED::DISK_2, 1},
-        {QNAPCtl::PanelLED::DISK_3, 2},
-        {QNAPCtl::PanelLED::DISK_4, 3},
+        {Daemon::PanelLED::DISK_1, 0},
+        {Daemon::PanelLED::DISK_2, 1},
+        {Daemon::PanelLED::DISK_3, 2},
+        {Daemon::PanelLED::DISK_4, 3},
     }}};
 
-constexpr Port<QNAPCtl::PanelLED, 1> portUsbLed = {
+constexpr Port<Daemon::PanelLED, 1> portUsbLed = {
     0xE1,
     {{
-        {QNAPCtl::PanelLED::USB, 7},
+        {Daemon::PanelLED::USB, 7},
     }}};
 
-constexpr Port<QNAPCtl::PanelButton, 1> portUsbButton = {
+constexpr Port<Daemon::PanelButton, 1> portUsbButton = {
     0xE2,
     {{
-        {QNAPCtl::PanelButton::USB_COPY, 2},
+        {Daemon::PanelButton::USB_COPY, 2},
     }}};
 
 // Reads the current bitmask for the port, applies any bit modifications from
@@ -80,7 +81,7 @@ QMap<T, bool> readModifyMaybeWrite(const Port<T, N> &ports,
   return current_values;
 }
 
-} // namespace
+}  // namespace
 
 void SIOPoller::run() {
   auto *timer = new QTimer;
@@ -103,9 +104,9 @@ void SIOPoller::poll() {
   // Emit the relevant signal when state toggles.
   const auto &portE2_values = readModifyMaybeWrite(portUsbButton);
   const bool usb_copy_pressed =
-      portE2_values.value(QNAPCtl::PanelButton::USB_COPY);
+      portE2_values.value(Daemon::PanelButton::USB_COPY);
   if (usb_copy_pressed != usb_copy_pressed_) {
-    emit buttonEvent(QNAPCtl::PanelButton::USB_COPY, usb_copy_pressed);
+    emit buttonEvent(Daemon::PanelButton::USB_COPY, usb_copy_pressed);
   }
   usb_copy_pressed_ = usb_copy_pressed;
 
@@ -113,6 +114,6 @@ void SIOPoller::poll() {
   ioperm(kRegPort, kPortCount, 0);
 }
 
-void SIOPoller::setLed(QNAPCtl::PanelLED led, bool on) {
+void SIOPoller::setLed(Daemon::PanelLED led, bool on) {
   intended_state_[led] = on;
 }

@@ -1,26 +1,23 @@
 #include <iostream>
 
 #include <QBitArray>
-#include <QMap>
 #include <QMetaEnum>
 #include <QSet>
-#include <QThread>
 #include <QTimer>
 
+#include "Daemon.h"
 #include "LCD.h"
-#include "QNAPCtl.h"
 #include "SIOPoller.h"
 
-QNAPCtl::QNAPCtl(QObject *parent) : QObject(parent) {
+Daemon::Daemon(QObject *parent) : QObject(parent) {
   lcd_ = new LCD(this);
   if (!lcd_->open("/dev/ttyS1")) {
     qWarning() << "Failed to open LCD serial port";
   }
-  connect(lcd_, &LCD::buttonEvent, this, &QNAPCtl::emitButtonEvent);
+  connect(lcd_, &LCD::buttonEvent, this, &Daemon::emitButtonEvent);
 
   sio_helper_ = new SIOPoller(this);
-  connect(sio_helper_, &SIOPoller::buttonEvent, this,
-          &QNAPCtl::emitButtonEvent);
+  connect(sio_helper_, &SIOPoller::buttonEvent, this, &Daemon::emitButtonEvent);
 
   // Switch everything off at startup.
   auto &&meta = QMetaEnum::fromType<PanelLED>();
@@ -31,7 +28,7 @@ QNAPCtl::QNAPCtl(QObject *parent) : QObject(parent) {
   sio_helper_->start();
 }
 
-void QNAPCtl::writeLCD(QString text) {
+void Daemon::writeLCD(const QString &text) {
   const auto &lines = text.split("\n").mid(0, 2);
   int index = 0;
   for (const auto &line : lines) {
@@ -39,32 +36,31 @@ void QNAPCtl::writeLCD(QString text) {
   }
 }
 
-void QNAPCtl::writeLCD(int line, QString text) {
+void Daemon::writeLCD(int line, const QString &text) {
   if (!lcd_->write(line, text.toLatin1())) {
     qWarning() << "Failed to write to LCD";
   }
 }
 
-void QNAPCtl::setLCDBacklight(bool on) {
+void Daemon::setLCDBacklight(bool on) {
   if (!lcd_->setBacklight(on)) {
     qWarning() << "Failed to switch LCD backlight";
   }
 }
 
-void QNAPCtl::setLED(QNAPCtl::PanelLED led, bool on) {
+void Daemon::setLED(Daemon::PanelLED led, bool on) {
   sio_helper_->setLed(led, on);
 }
 
-void QNAPCtl::setLED(const QString &led_name, bool on) {
+void Daemon::setLED(const QString &led_name, bool on) {
   auto &&meta = QMetaEnum::fromType<PanelLED>();
   bool ok;
   const PanelLED led =
       static_cast<const PanelLED>(meta.keyToValue(qPrintable(led_name), &ok));
-  if (!ok)
-    return;
+  if (!ok) return;
   setLED(led, on);
 }
 
-void QNAPCtl::emitButtonEvent(QNAPCtl::PanelButton button, bool pressed) {
+void Daemon::emitButtonEvent(Daemon::PanelButton button, bool pressed) {
   emit buttonEvent(QVariant::fromValue(button).toString(), pressed);
 }

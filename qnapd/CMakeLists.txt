@@ -13,23 +13,23 @@ set(interface_xml eu.zopi.qnapctl.xml)
 set_source_files_properties(${interface_xml} PROPERTIES CLASSNAME QNAPCtlAdaptor)
 set_source_files_properties(${interface_xml} PROPERTIES NO_NAMESPACE true)
 qt5_add_dbus_adaptor(
-  qnapd_adaptor_SRCS
-  ${interface_xml}
-  QNAPCtl.h
-  QNAPCtl
+        qnapd_adaptor_SRCS
+        ${interface_xml}
+        Daemon.h
+        Daemon
 )
 
-# QNAPCtl daemon (qnapd)
+# Daemon daemon (qnapd)
 set(
-  qnapd_SRCS
-  ${qnapd_adaptor_SRCS}
-  QNAPCtl.cpp
-  QNAPCtl.h
-  LCD.cpp
-  LCD.h
-  SIOPoller.cpp
-  SIOPoller.h
-  main.cpp
+        qnapd_SRCS
+        ${qnapd_adaptor_SRCS}
+        Daemon.cpp
+        Daemon.h
+        LCD.cpp
+        LCD.h
+        SIOPoller.cpp
+        SIOPoller.h
+        main.cpp
 )
 
 add_executable(qnapd ${qnapd_SRCS})
@@ -42,6 +42,6 @@ install(TARGETS qnapd)
 
 # Policy file.
 install(
-  FILES eu.zopi.QNAPCtl.conf
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/etc/dbus-1/system.d
+        FILES eu.zopi.QNAPCtl.conf
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/etc/dbus-1/system.d
 )

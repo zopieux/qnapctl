@@ -1,29 +1,30 @@
 #pragma once
 
+#include <QMap>
 #include <QObject>
 #include <QThread>
 
-#include "QNAPCtl.h"
+#include "Daemon.h"
 
 class SIOPoller : public QThread {
   Q_OBJECT
 
-public:
+ public:
   explicit SIOPoller(QObject *parent = nullptr) : QThread(parent) {}
 
-signals:
-  void buttonEvent(QNAPCtl::PanelButton button, bool pressed);
+ signals:
+  void buttonEvent(Daemon::PanelButton button, bool pressed);
 
-public slots:
-  void setLed(QNAPCtl::PanelLED led, bool on);
+ public slots:
+  void setLed(Daemon::PanelLED led, bool on);
 
-protected:
+ protected:
   void run() override;
 
-protected slots:
+ protected slots:
   void poll();
 
-private:
+ private:
   bool usb_copy_pressed_ = false;
-  QMap<QNAPCtl::PanelLED, bool> intended_state_;
+  QMap<Daemon::PanelLED, bool> intended_state_;
 };

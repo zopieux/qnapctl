@@ -6,11 +6,11 @@
 #include <QSerialPortInfo>
 #include <QtCore>
 
+#include "Daemon.h"
 #include "LCD.h"
-#include "QNAPCtl.h"
 #include "qnapctladaptor.h"
 
-constexpr char kServiceName[] = "eu.zopi.QNAPCtl";
+constexpr char kServiceName[] = "eu.zopi.Daemon";
 constexpr char kServicePath[] = "/eu/zopi/qnapctrl";
 
 int main(int argc, char *argv[]) {
@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
 
   auto systemBus = QDBusConnection::systemBus();
 
-  auto *ctrl = new QNAPCtl;
+  auto *ctrl = new Daemon;
   new QNAPCtlInterfaceAdaptor(ctrl);
 
   if (!systemBus.registerObject(kServicePath, ctrl)) {
-    std::cerr << "Could not register QNAPCtl object: "
+    std::cerr << "Could not register Daemon object: "
               << qPrintable(systemBus.lastError().message()) << "\n";
     exit(1);
   }

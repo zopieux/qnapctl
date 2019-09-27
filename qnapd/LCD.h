@@ -2,28 +2,28 @@
 
 #include <QtSerialPort>
 
-#include "QNAPCtl.h"
+#include "Daemon.h"
 
 class LCD : public QObject {
   Q_OBJECT
 
-public:
+ public:
   explicit LCD(QObject *parent = nullptr);
 
-signals:
-  void buttonEvent(QNAPCtl::PanelButton button, bool pressed);
+ signals:
+  void buttonEvent(Daemon::PanelButton button, bool pressed);
 
-public slots:
+ public slots:
   bool open(const QString &portName);
 
   bool write(int line, const QByteArray &chars);
 
   bool setBacklight(bool on);
 
-private slots:
+ private slots:
   void readyRead();
 
-private:
+ private:
   QSerialPort *serial_port_;
   bool has_state_ = false;
   bool btn_enter_state_ = false;
