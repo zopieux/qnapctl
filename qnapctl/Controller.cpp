@@ -5,20 +5,15 @@
 
 namespace {
 
-void maybeStart(QTimer* timer, int msec) {
-  if (timer->isActive()) {
-    timer->setInterval(msec);
-  } else {
-    timer->start(msec);
-  }
+inline QString fillLCD(const QString& s) {
+  return s.leftJustified(16);
 }
 
 }  // namespace
 
 Controller::Controller(QObject* parent)
-    : state_(State::SLEEP),
-      blink_green_(false),
-      blink_red_(false),
+    : QObject(parent),
+      state_(State::SLEEP),
       load_average_(0),
       services_running_(0),
       services_failed_(0) {
@@ -32,20 +27,13 @@ Controller::Controller(QObject* parent)
   poll_status_timer_->setSingleShot(false);
   connect(poll_status_timer_, &QTimer::timeout, this, &Controller::pollStatus);
 
-  blink_timer_green_ = new QTimer(this);
-  blink_timer_green_->setSingleShot(false);
-  connect(blink_timer_green_, &QTimer::timeout,
-          [this]() { blinkLed(Led::STATUS_GREEN); });
-
-  blink_timer_red_ = new QTimer(this);
-  blink_timer_red_->setSingleShot(false);
-  connect(blink_timer_red_, &QTimer::timeout,
-          [this]() { blinkLed(Led::STATUS_RED); });
-
   ctrl_ = new QNAPCtlInterface("eu.zopi.Daemon", "/eu/zopi/qnapctrl",
                                QDBusConnection::systemBus());
   connect(ctrl_, &QNAPCtlInterface::buttonEvent, this,
           &Controller::onButtonEvent);
+
+  led_green_ = new LedBlinker(ctrl_, "STATUS_GREEN", this);
+  led_red_ = new LedBlinker(ctrl_, "STATUS_RED", this);
 
   goToSleep();
   poll_status_timer_->start();
@@ -91,12 +79,12 @@ void Controller::pollStatus() {
   }
   arg.endArray();
 
-  maybeStart(blink_timer_green_, static_cast<int>(1000 / load_average_));
+  led_green_->setInterval(qMin(2000., 1000 / load_average_));
 
   if (services_failed == 0) {
-    blink_timer_red_->stop();
+    led_red_->setInterval(0);
   } else {
-    maybeStart(blink_timer_red_, static_cast<int>(1000 / services_failed));
+    led_red_->setInterval(qMax(1000., 1000 / static_cast<double>(services_failed)));
   }
 
   services_running_ = services_running;
@@ -120,26 +108,29 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
   const bool isEnter = button == "ENTER";
 
   auto showStatus = [this]() {
-    resetSleepTimer();
     state_ = State::STATUS;
 
     const auto& hostname = QHostInfo::localHostName();
-    ctrl_->writeLCD(0, QString("H: %1").arg(hostname));
-    ctrl_->writeLCD(1, QString("L: %1  S: %2")
-                           .arg(load_average_, 0, 'f', 1)
-                           .arg(services_running_, 2));
+    ctrl_->writeLCD(0, fillLCD(QString("H: %1").arg(hostname)));
+    ctrl_->writeLCD(1, fillLCD(QString("L: %1  S: %2")
+                                   .arg(load_average_, 0, 'f', 1)
+                                   .arg(services_running_, 2)));
+
+    resetSleepTimer();
   };
 
   auto showNetwork = [this]() {
-    resetSleepTimer();
     state_ = State::NETWORK;
 
     QList<QString> addrs;
     for (const auto& addr : QNetworkInterface::allAddresses()) {
+      if (addr.isLoopback()) continue;
       addrs.append(addr.toString());
     }
-    if (addrs.size() >= 1) ctrl_->writeLCD(0, "IP: " + addrs.at(0));
-    if (addrs.size() >= 2) ctrl_->writeLCD(1, "IP: " + addrs.at(1));
+    if (addrs.size() >= 1) ctrl_->writeLCD(0, fillLCD("IP: " + addrs.at(0)));
+    if (addrs.size() >= 2) ctrl_->writeLCD(1, fillLCD("IP: " + addrs.at(1)));
+
+    resetSleepTimer();
   };
 
   switch (state_) {
@@ -153,19 +144,6 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
 
     case State::NETWORK:
       if (isSelect) showStatus();
-      break;
-  }
-}
-
-void Controller::blinkLed(Controller::Led led) {
-  switch (led) {
-    case Led::STATUS_GREEN:
-      blink_green_ = !blink_green_;
-      ctrl_->setLED("STATUS_GREEN", blink_green_);
-      break;
-    case Led::STATUS_RED:
-      blink_red_ = !blink_red_;
-      ctrl_->setLED("STATUS_RED", blink_red_);
       break;
   }
 }

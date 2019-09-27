@@ -17,6 +17,7 @@ qt5_add_dbus_adaptor(
         ${interface_xml}
         Daemon.h
         Daemon
+        dbus_qnapctl_adaptor
 )
 
 # Daemon daemon (qnapd)

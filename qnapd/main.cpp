@@ -8,7 +8,7 @@
 
 #include "Daemon.h"
 #include "LCD.h"
-#include "qnapctladaptor.h"
+#include "dbus_qnapctl_adaptor.h"
 
 constexpr char kServiceName[] = "eu.zopi.Daemon";
 constexpr char kServicePath[] = "/eu/zopi/qnapctrl";

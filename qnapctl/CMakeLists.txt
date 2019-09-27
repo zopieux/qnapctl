@@ -25,6 +25,8 @@ set(
         main.cpp
         Controller.cpp
         Controller.h
+        LedBlinker.cpp
+        LedBlinker.h
 )
 
 add_executable(qnapctl ${qnapctl_SRCS})
