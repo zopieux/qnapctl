@@ -1,5 +1,7 @@
 #include "Controller.h"
 
+#include <tuple>
+
 #include <QHostInfo>
 #include <QNetworkInterface>
 
@@ -7,50 +9,20 @@
 
 namespace {
 
+constexpr int kLCDDimTimeoutMs = 5 * 1000;
+constexpr int kPollStatusIntervalMs = 10 * 1000;
+
 inline QString fillLCD(const QString& s) { return s.leftJustified(16); }
 
-}  // namespace
-
-Controller::Controller(QObject* parent)
-    : QObject(parent),
-      state_(State::SLEEP),
-      load_average_(0),
-      services_running_(0),
-      services_failed_(0) {
-  sleep_timer_ = new QTimer(this);
-  sleep_timer_->setInterval(4 * 1000);
-  sleep_timer_->setSingleShot(true);
-  connect(sleep_timer_, &QTimer::timeout, this, &Controller::goToSleep);
-
-  poll_status_timer_ = new QTimer(this);
-  poll_status_timer_->setInterval(2 * 1000);
-  poll_status_timer_->setSingleShot(false);
-  connect(poll_status_timer_, &QTimer::timeout, this, &Controller::pollStatus);
-
-  ctrl_ = new QNAPCtlInterface(DBUS_SERVICE, DBUS_PATH,
-                               QDBusConnection::systemBus());
-  connect(ctrl_, &QNAPCtlInterface::buttonEvent, this,
-          &Controller::onButtonEvent);
-
-  led_green_ = new LedBlinker(ctrl_, "STATUS_GREEN", this);
-  led_red_ = new LedBlinker(ctrl_, "STATUS_RED", this);
-
-  goToSleep();
-  poll_status_timer_->start();
-}
-
-void Controller::goToSleep() {
-  ctrl_->setLCDBacklight(false);
-  state_ = State::SLEEP;
-}
-
-void Controller::pollStatus() {
+double getLoadAverage() {
   QFile f("/proc/loadavg");
   f.open(QIODevice::ReadOnly);
   const QString load_average_str(f.readAll());
   f.close();
-  load_average_ = load_average_str.split(' ').at(0).toDouble();
+  return load_average_str.split(' ').at(0).toDouble();
+}
 
+std::tuple<size_t, size_t, size_t> getSystemdUnitStats() {
   auto listUnits = QDBusMessage::createMethodCall(
       "org.freedesktop.systemd1", "/org/freedesktop/systemd1",
       "org.freedesktop.systemd1.Manager", "ListUnits");
@@ -79,22 +51,62 @@ void Controller::pollStatus() {
   }
   arg.endArray();
 
+  return std::make_tuple(service_count, services_running, services_failed);
+}
+
+}  // namespace
+
+Controller::Controller(QObject* parent)
+    : QObject(parent),
+      state_(State::SLEEP),
+      load_average_(0),
+      services_running_(0),
+      services_failed_(0) {
+  lcd_dim_timer_ = new QTimer(this);
+  lcd_dim_timer_->setInterval(kLCDDimTimeoutMs);
+  lcd_dim_timer_->setSingleShot(true);
+  connect(lcd_dim_timer_, &QTimer::timeout, this, &Controller::goToSleep);
+
+  poll_status_timer_ = new QTimer(this);
+  poll_status_timer_->setInterval(kPollStatusIntervalMs);
+  poll_status_timer_->setSingleShot(false);
+  connect(poll_status_timer_, &QTimer::timeout, this, &Controller::pollStatus);
+
+  ctrl_ = new QNAPCtlInterface(DBUS_SERVICE, DBUS_PATH,
+                               QDBusConnection::systemBus());
+  connect(ctrl_, &QNAPCtlInterface::buttonEvent, this,
+          &Controller::onButtonEvent);
+
+  led_green_ = new LedBlinker(ctrl_, "STATUS_GREEN", this);
+  led_red_ = new LedBlinker(ctrl_, "STATUS_RED", this);
+
+  goToSleep();
+  poll_status_timer_->start();
+}
+
+void Controller::goToSleep() {
+  ctrl_->setLCDBacklight(false);
+  state_ = State::SLEEP;
+}
+
+void Controller::pollStatus() {
+  load_average_ = getLoadAverage();
   led_green_->setInterval(qMin(2000., 1000 / load_average_));
 
+  auto [_, services_running,  services_failed] = getSystemdUnitStats();
+  services_running_ = services_running;
+  services_failed_ = services_failed;
   if (services_failed == 0) {
     led_red_->setInterval(0);
   } else {
     led_red_->setInterval(
         qMax(1000., 1000 / static_cast<double>(services_failed)));
   }
-
-  services_running_ = services_running;
-  services_failed_ = services_failed;
 }
 
-void Controller::resetSleepTimer() {
+void Controller::resetDimTimer() {
   ctrl_->setLCDBacklight(true);
-  sleep_timer_->start();
+  lcd_dim_timer_->start();
 }
 
 void Controller::onButtonEvent(const QString& button, bool pressed) {
@@ -117,7 +129,7 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
                                    .arg(load_average_, 0, 'f', 1)
                                    .arg(services_running_, 2)));
 
-    resetSleepTimer();
+    resetDimTimer();
   };
 
   auto showNetwork = [this]() {
@@ -131,7 +143,7 @@ void Controller::onButtonEvent(const QString& button, bool pressed) {
     if (addrs.size() >= 1) ctrl_->writeLCD(0, fillLCD("IP: " + addrs.at(0)));
     if (addrs.size() >= 2) ctrl_->writeLCD(1, fillLCD("IP: " + addrs.at(1)));
 
-    resetSleepTimer();
+    resetDimTimer();
   };
 
   switch (state_) {

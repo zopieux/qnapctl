@@ -22,7 +22,7 @@ class Controller : public QObject {
 
   QNAPCtlInterface* ctrl_;
 
-  QTimer* sleep_timer_;
+  QTimer* lcd_dim_timer_;
   QTimer* poll_status_timer_;
 
   LedBlinker* led_green_;
@@ -31,5 +31,5 @@ class Controller : public QObject {
   double load_average_;
   size_t services_running_, services_failed_;
 
-  void resetSleepTimer();
+  void resetDimTimer();
 };
