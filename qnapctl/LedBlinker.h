@@ -10,7 +10,8 @@ class LedBlinker : public QObject {
   Q_OBJECT
 
  public:
-  explicit LedBlinker(QNAPCtlInterface* ctrl, QString led, QObject* parent = nullptr);
+  explicit LedBlinker(QNAPCtlInterface* ctrl, QString led,
+                      QObject* parent = nullptr);
 
  public slots:
   void setInterval(int msec);

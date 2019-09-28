@@ -1,0 +1,5 @@
+#pragma once
+
+#define DBUS_PATH "@dbus_path@"
+#define DBUS_INTERFACE "@dbus_iface@"
+#define DBUS_SERVICE "@dbus_service@"

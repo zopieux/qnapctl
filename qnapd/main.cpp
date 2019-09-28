@@ -1,17 +1,13 @@
 #include <iostream>
 
 #include <QDBusConnection>
-#include <QDBusError>
-#include <QDebug>
 #include <QSerialPortInfo>
 #include <QtCore>
 
+#include "Config.h"
 #include "Daemon.h"
 #include "LCD.h"
 #include "dbus_qnapctl_adaptor.h"
-
-constexpr char kServiceName[] = "eu.zopi.Daemon";
-constexpr char kServicePath[] = "/eu/zopi/qnapctrl";
 
 int main(int argc, char *argv[]) {
   QCoreApplication app(argc, argv);
@@ -21,21 +17,22 @@ int main(int argc, char *argv[]) {
   auto *ctrl = new Daemon;
   new QNAPCtlInterfaceAdaptor(ctrl);
 
-  if (!systemBus.registerObject(kServicePath, ctrl)) {
+  if (!systemBus.registerObject(DBUS_PATH, ctrl)) {
     std::cerr << "Could not register Daemon object: "
               << qPrintable(systemBus.lastError().message()) << "\n";
     exit(1);
   }
 
-  if (!systemBus.registerService(kServiceName)) {
-    std::cerr << "Could not register service " << kServiceName << ": "
+  if (!systemBus.registerService(DBUS_SERVICE)) {
+    std::cerr << "Could not register service " << DBUS_SERVICE << ": "
               << qPrintable(systemBus.lastError().message()) << "\n";
     exit(1);
   }
 
   std::cerr << "Ready.\n"
-               "  Interface: eu.zopi.QNAPCtlInterface\n    Service: "
-            << kServiceName << "\n       Path: " << kServicePath << "\n";
+            << "  Interface: " << DBUS_INTERFACE << "\n"
+            << "    Service: " << DBUS_SERVICE << "\n"
+            << "       Path: " << DBUS_PATH << "\n";
 
   return app.exec();
 }

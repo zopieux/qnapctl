@@ -3,11 +3,11 @@
 #include <QHostInfo>
 #include <QNetworkInterface>
 
+#include "Config.h"
+
 namespace {
 
-inline QString fillLCD(const QString& s) {
-  return s.leftJustified(16);
-}
+inline QString fillLCD(const QString& s) { return s.leftJustified(16); }
 
 }  // namespace
 
@@ -27,7 +27,7 @@ Controller::Controller(QObject* parent)
   poll_status_timer_->setSingleShot(false);
   connect(poll_status_timer_, &QTimer::timeout, this, &Controller::pollStatus);
 
-  ctrl_ = new QNAPCtlInterface("eu.zopi.Daemon", "/eu/zopi/qnapctrl",
+  ctrl_ = new QNAPCtlInterface(DBUS_SERVICE, DBUS_PATH,
                                QDBusConnection::systemBus());
   connect(ctrl_, &QNAPCtlInterface::buttonEvent, this,
           &Controller::onButtonEvent);
@@ -84,7 +84,8 @@ void Controller::pollStatus() {
   if (services_failed == 0) {
     led_red_->setInterval(0);
   } else {
-    led_red_->setInterval(qMax(1000., 1000 / static_cast<double>(services_failed)));
+    led_red_->setInterval(
+        qMax(1000., 1000 / static_cast<double>(services_failed)));
   }
 
   services_running_ = services_running;

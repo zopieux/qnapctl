@@ -1,7 +1,7 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
         "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-<node name="/eu/zopi/qnapctl">
-    <interface name="eu.zopi.QNAPCtlInterface">
+<node name="@dbus_path@">
+    <interface name="@dbus_iface@">
         <signal name="buttonEvent">
             <arg name="button" type="s" direction="out"/>
             <arg name="pressed" type="b" direction="out"/>

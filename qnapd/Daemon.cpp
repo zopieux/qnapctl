@@ -3,7 +3,6 @@
 #include <QBitArray>
 #include <QMetaEnum>
 #include <QSet>
-#include <QTimer>
 
 #include "Daemon.h"
 #include "LCD.h"

@@ -21,6 +21,7 @@ class Controller : public QObject {
   enum class State { SLEEP, STATUS, NETWORK } state_;
 
   QNAPCtlInterface* ctrl_;
+
   QTimer* sleep_timer_;
   QTimer* poll_status_timer_;
 
