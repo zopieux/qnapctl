@@ -16,9 +16,9 @@ Beware: this was developped and tested exclusively on the QNAP device I own, mod
 
 TS-453 Pro features:
 
-* an A125 LCD panel with two 2×16 chars, backlight and two control buttons
-* a 4 disk bay, with activity and error LEDs for each of the 4 bays
-* some extra LEDs: dual-color status (green & red), USB activity and non-overridable network activity
+* an A125 LCD panel with a 2×16 char display, backlight and two control buttons
+* a 4-disk bay, with activity and error LEDs for each of the 4 bays
+* some extra LEDs: dual-color status (green & red), USB activity and network activity (this one sadly cannot be controlled)
 
 ### qnapd
 
