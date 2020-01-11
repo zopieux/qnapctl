@@ -7,19 +7,30 @@ jobs:
   build:
     strategy:
         matrix:
-          cc: [ gcc, clang ]
+          cc: [gcc, clang]
+
     runs-on: ubuntu-latest
     steps:
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qtbase5-dev libqt5serialport5-dev
       - uses: actions/checkout@master
-      - uses: docker://lpenz/ghaction-cmake:latest
-        with:
-          dependencies: "qtbase5-dev libqt5serialport5-dev"
-          cc: ${{ matrix.cc }}
+      - name: Build
+        run: |
+          SRCDIR="$PWD"
+          export CC=${{ matrix.cc }}
+          mkdir /tmp/_build /tmp/_install
+          cd /tmp/_build
+          cmake -DCMAKE_INSTALL_PREFIX=/tmp/_install "$SRCDIR"
+          make VERBOSE=1
+          make install
 
   clang-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: docker://lpenz/ghaction-cmake:latest
-        with:
-          analyzer: clang-format
+      - name: clang-format
+        run: |
+          find "$PWD" \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \) -exec clang-format -i {}
+          git diff --exit-code
