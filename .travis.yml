@@ -48,3 +48,15 @@ notifications:
   email:
     on_success: never
     on_failure: never
+
+deploy:
+  provider: releases
+  api_key:
+    secure: SILYFhJ5IMFiq6CsI2JSMJ7Nn2XEZ6wDAKh+fWYcCNVQhMK1kml5HLZBjH0/NoFqv1LitFhepmzFcOF5TQTN6kU3OqisnsNSAayJBvuPGQY/PPZIDcHuVnyqUDbxfQk5th+sPZWf5iImX+domqNlrSGVr9MKgP3/4DI1TVHe4auH6Q6tvW1tzePDKHczAMiHVKgfNnL+OCNlCng+3yBA8o3dGAqMs3FlvC2XwhWvAIYHtilyqsWjCzXe06c2CeOC35A+xl7c6HKRuoqa4j6g+l4DbI3g7q8Z2fNe2nq6RqBkhELieYSzUUZ5ID6lszK7O/UBH8fNEgLNabiu1qT7qQ84GZprqoF71rIAhBRILyNok8LT+s2FPAlBNa8gUngpCMwGEpFE32+mT76N8MizzHEVzDgWxeB/Tebrr2tCVpynaic8P+OqppYzj1erux//2bUx9sIAI2mvAdbHM2gPPl93WQ/YKu6CMqfnzE/KHsBkMN2A7ANroEAsg4qplnqrEPHu3vmMKuC/84a0dLagR/5Xo0i7rpuNBuMbdVylI3wvzFSvJ+AGnAEQqJCtOPZZEmxh1j2f7UsC/4q9CN86RoqJVsLaSYxC/C7vxTcxHPRhWNST+RyUi7uwPVSVa9BLssBoFGFjxb/G00RlsLWMaexGW+UhrSqkCLXiiDYDwVk=
+  file_glob: true
+  file: $TRAVIS_BUILD_DIR/_install/**/*
+  skip_cleanup: true
+  draft: true
+  on:
+    tags: true
+    
