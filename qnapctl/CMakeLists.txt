@@ -36,4 +36,4 @@ target_link_libraries(qnapctl Qt5::Core)
 target_link_libraries(qnapctl Qt5::DBus)
 target_link_libraries(qnapctl Qt5::Network)
 
-install(TARGETS qnapctl RUNTIME)
+install(TARGETS qnapctl RUNTIME DESTINATION bin)
