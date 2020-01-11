@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: docker://lpenz/ghaction-cmake:latest
         with:
+          dependencies: "qtbase5-dev libqt5serialport5-dev"
           cc: ${{ matrix.cc }}
 
   clang-format:
