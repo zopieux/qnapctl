@@ -1,0 +1,50 @@
+os: linux
+dist: bionic
+cache: ccache
+language: cpp
+
+addons:
+  apt:
+    packages:
+      - clang-format
+
+jobs:
+ include:
+  - env: [JOB=build]
+    compiler: gcc
+    name: Build with gcc
+
+  - env: [JOB=build]
+    compiler: clang
+    name: Build with clang
+
+  - env: [JOB=clang-format]
+    name: Check code style with clang-format
+
+before_install:
+  - if test $JOB == build; then sudo add-apt-repository -y ppa:beineri/opt-qt-5.14.0-bionic && sudo apt-get update -qq; fi
+
+install:
+  - if test $JOB == build; then sudo apt-get install -qq qt514base qt514serialport && source /opt/qt514/bin/qt514-env.sh; fi
+
+script:
+  - | 
+      if test $JOB == build; then
+      mkdir _build _install
+      cd _build 
+      cmake -DCMAKE_INSTALL_PREFIX=$PWD/../_install ..
+      make VERBOSE=1
+      make install
+      fi
+
+  - | 
+      if test $JOB == clang-format; then
+      shopt -s globstar
+      clang-format -i **/*.h **/*.cpp
+      git diff --exit-code
+      fi
+
+notifications:
+  email:
+    on_success: never
+    on_failure: never
