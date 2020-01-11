@@ -1,8 +1,7 @@
-#include <iostream>
-
 #include <QDBusConnection>
 #include <QSerialPortInfo>
 #include <QtCore>
+#include <iostream>
 
 #include "Config.h"
 #include "Daemon.h"

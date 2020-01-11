@@ -1,10 +1,10 @@
-#include <iostream>
+#include "Daemon.h"
 
 #include <QBitArray>
 #include <QMetaEnum>
 #include <QSet>
+#include <iostream>
 
-#include "Daemon.h"
 #include "LCD.h"
 #include "SIOPoller.h"
 

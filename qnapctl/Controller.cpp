@@ -1,9 +1,8 @@
 #include "Controller.h"
 
-#include <tuple>
-
 #include <QHostInfo>
 #include <QNetworkInterface>
+#include <tuple>
 
 #include "Config.h"
 
@@ -93,7 +92,7 @@ void Controller::pollStatus() {
   load_average_ = getLoadAverage();
   led_green_->setInterval(qMin(2000., 1000 / load_average_));
 
-  auto [_, services_running,  services_failed] = getSystemdUnitStats();
+  auto [_, services_running, services_failed] = getSystemdUnitStats();
   services_running_ = services_running;
   services_failed_ = services_failed;
   if (services_failed == 0) {
