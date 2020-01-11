@@ -40,7 +40,7 @@ target_link_libraries(qnapd Qt5::Core)
 target_link_libraries(qnapd Qt5::DBus)
 target_link_libraries(qnapd Qt5::SerialPort)
 
-install(TARGETS qnapd)
+install(TARGETS qnapd RUNTIME)
 
 # Policy file.
 set(dbus_policy ${dbus_service}.conf)
