@@ -2,24 +2,34 @@
         "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node name="@dbus_path@">
     <interface name="@dbus_iface@">
+        <!-- Signal sent when a button is pressed or released. -->
         <signal name="buttonEvent">
+            <!-- The pressed or released button: ENTER, SELECT, USB_COPY. -->
             <arg name="button" type="s" direction="out"/>
+            <!-- True if the button was pressed, false if it was released. -->
             <arg name="pressed" type="b" direction="out"/>
         </signal>
 
+        <!-- Switches LCD backlight on or off. -->
         <method name="setLCDBacklight">
             <arg name="on" type="b" direction="in"/>
         </method>
 
+        <!-- Writes a single line of text on the LCD display. -->
         <method name="writeLCD">
+            <!-- Line index, 0 or 1. -->
             <arg name="line" type="i" direction="in"/>
+            <!-- The line text. -->
             <arg name="text" type="s" direction="in"/>
         </method>
 
+        <!-- Writes text on the LCD display. Supports newlines. -->
         <method name="writeLCD">
             <arg name="text" type="s" direction="in"/>
         </method>
 
+        <!-- Switches an LED on or off. Available LED names:
+             STATUS_GREEN, STATUS_RED, USB, DISK_1, DISK_2, DISK_3, DISK_4. -->
         <method name="setLED">
             <arg name="led" type="s" direction="in"/>
             <arg name="on" type="b" direction="in"/>
